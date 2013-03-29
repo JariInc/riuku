@@ -11,7 +11,9 @@ $(document).ready(function() {
 		$("#refresh").spin("small");
 		
 		$.getJSON('refresh.php', function(data) {
-			//alert(data["time"]);
+			
+			$("#alerts").show();
+			
 			if(data["items_added"] > 1)
 				$("#alerts").html('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>'+ data['items_added'] +' items added in '+ Number((data['time']).toFixed(3)) +' seconds.</div>');
 			else if(data["items_added"] == 1)
@@ -114,10 +116,11 @@ function getfeeds() {
 function getitems(timestamp) {
 	$.getJSON('items.php?ts='+ timestamp	, function(data) {
 		$.each(data["items"], function(key, val) {
-			if(val["timestamp"] > lastItemTimestamp) {
-				lastItemTimestamp = val["timestamp"];
+			
+			if(parseInt(val["timestamp"]) > lastItemTimestamp) {
+				lastItemTimestamp = parseInt(val["timestamp"]);
 			}
-			//$("#items").prepend("<p><a href=\""+ val["link"] +"\">"+ val["subject"] +"</a> <small>"+ val["feed"] +"</small></p>");
+			
 			$("#items").prepend(
 				'<div class="item" item="'+ val['ROWID'] +'">'+
 				'	<p class="itemheader">'+
@@ -129,22 +132,6 @@ function getitems(timestamp) {
 				'		<p><a class="btn btn-mini btn-primary" href="'+ val['link'] +'">More</a></p>'+
 				'	</div>'+
 				'</div>'
-				/*
-				'<div class="accordion-group">'+
-				'	<div class="accordion-heading">'+
-				'		<a class="accordion-toggle" data-toggle="collapse" data-parent="#items" href="#item-'+ val['ROWID'] +'">'+
-				'			'+ val['subject'] +
-				'		</a>'+
-				'	</div>'+
-				'	<div id="item-'+ val['ROWID'] +'" class="accordion-body collapse">'+
-				'		<div class="accordion-inner">'+
-				'			<small>'+ val['feed'] +'</small>'+
-				'			<p>'+ val['content'] +'</p>'+
-				'			<p><a class="btn btn-mini btn-primary" href="'+ val['link'] +'">More...</a></p>'+
-				'		</div>'+
-				'	</div>'+
-				'</div>'
-				*/
 			);
 		});
 	}).done(function(data) {
@@ -152,11 +139,13 @@ function getitems(timestamp) {
 		
 		// expand
 		$('.item').click(function( event ) {
-			var id = $(this).attr("item");
-			$('.itemcontent').not('#item-'+ id).hide();
-			$('#item-'+ id).toggle();
+			// don't hide content if button is clicked (extrenal link)
+			var target = $(event.target);
+			if(!target.hasClass('btn')) {
+				var id = $(this).attr("item");
+				$('.itemcontent').not('#item-'+ id).hide();
+				$('#item-'+ id).toggle();
+			}
 		});
 	}); 
-	
-
 }

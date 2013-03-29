@@ -17,7 +17,6 @@
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
 			</div>
 		</div>
-
     
     <!-- Le javascript
     ================================================== -->

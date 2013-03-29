@@ -9,8 +9,35 @@
 	
 	foreach($feeds_data as $data)
 		$feeds[$data["ROWID"]] = $data["name"];
+
+	if((int)$_REQUEST["ts"]) {
+		$limit = "
+			WHERE timestamp > '". gmdate("Y-m-d H:i:s", (int)$_REQUEST["ts"]) ."' 
+			ORDER BY timestamp ASC 
+		";
+	}
+	else {
+		$limit = "
+			ORDER BY timestamp DESC 
+		";
+	}
+		
+	$items = $db->query("
+		SELECT 
+			ROWID, 
+			strftime('%s', timestamp) AS timestamp, 
+			feed, 
+			subject, 
+			content, 
+			link
+		FROM items 
+		$limit
+		LIMIT 50;
+	");
 	
-	$items = $db->query("SELECT ROWID, strftime('%s', timestamp) AS timestamp, feed, subject, content, link FROM items WHERE timestamp > '". date("Y-m-d H:i:s", (int)$_REQUEST["ts"]) ."' ORDER BY timestamp ASC LIMIT 50;");
+	if((int)$_REQUEST["ts"] == 0) {
+		$items = array_reverse($items);
+	}
 	
 	$return = array();
 	
@@ -21,5 +48,9 @@
 	echo json_encode(array(
 		"items" => $return,
 	));
+	
+	$fp = fopen('debug.log', 'a+');
+	fwrite($fp, $_REQUEST["ts"] ." ". gmdate("Y-m-d H:i:s", (int)$_REQUEST["ts"]) ."\n");
+	fclose($fp);
 	
 ?>
