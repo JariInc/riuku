@@ -12,10 +12,10 @@ class db {
 		$res = $this->query($sql);
 		
 		if(count($res) == 0) {
-			$sql = "CREATE TABLE feeds(name text NOT NULL, url text NOT NULL);";
+			$sql = "CREATE TABLE feeds(name TEXT NOT NULL, url TEXT NOT NULL);";
 			$this->query($sql);
 			
-			$sql = "CREATE TABLE items(feed integer NOT NULL, timestamp datetime, subject text, content text, link text);";
+			$sql = "CREATE TABLE items(feed INTEGER NOT NULL, timestamp DATETIME, subject TEXT, content TEXT, link TEXT, unread BOOLEAN);";
 			$this->query($sql);
 		}
 	}
