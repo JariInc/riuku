@@ -1,3 +1,6 @@
+			<footer>
+				<p>Powered by <a href="https://github.com/JariInc/riuku">Riuku</a></p>
+			</footer>
     </div> <!-- /container -->
 
 		<!-- Manage -->
@@ -17,7 +20,7 @@
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
 			</div>
 		</div>
-    
+		
     <!-- Le javascript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
