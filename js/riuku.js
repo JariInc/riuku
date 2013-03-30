@@ -21,7 +21,7 @@ $(document).ready(function() {
 			else
 				$("#alerts").html('<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert">&times;</button>No items added.</div>');
 			
-			$("#alerts").delay(3000).fadeOut("slow");
+			$("#alerts").delay(10000).fadeOut("slow");
 			
 		})
 		.done(function() { 
@@ -143,9 +143,31 @@ function getitems(timestamp) {
 			var target = $(event.target);
 			if(!target.hasClass('btn')) {
 				var id = $(this).attr("item");
-				$('.itemcontent').not('#item-'+ id).hide();
+				var scrollbar = $(window).scrollTop();
+				var offset = 0;
+				$('.itemcontent:visible').not('#item-'+ id).each(function() {
+					offset = offset + $(this).height();
+					$(this).hide();
+				});
+				
 				$('#item-'+ id).toggle();
+				
+				// scroll to header and leave 5px margin to top
+				if(isMobile()) {
+					$(window).scrollTop($('#item-'+ id).prev().offset().top - 5);
+				}
+				else {
+					$(window).scrollTop($('#item-'+ id).prev().offset().top - $('.navbar').height() - 5);
+				}
 			}
 		});
 	}); 
+}
+
+
+function isMobile() {
+	if($('.visible-mobile').css('display') == "block")
+		return true;
+	else
+		return false;
 }
