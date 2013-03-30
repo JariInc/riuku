@@ -49,8 +49,4 @@
 		"items" => $return,
 	));
 	
-	$fp = fopen('debug.log', 'a+');
-	fwrite($fp, $_REQUEST["ts"] ." ". gmdate("Y-m-d H:i:s", (int)$_REQUEST["ts"]) ."\n");
-	fclose($fp);
-	
 ?>
