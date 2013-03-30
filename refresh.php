@@ -27,13 +27,14 @@ foreach($feeds as $feed) {
 		if(count($exists) == 0) {
 			$db->query("
 				INSERT INTO 
-				items(feed, timestamp, subject, content, link) 
+				items(feed, timestamp, subject, content, link, unread) 
 				VALUES(
 					'". $feed["ROWID"] ."', 
 					datetime('". sqlite_escape_string($i->get_date('U')) ."', 'unixepoch'), 
 					'". sqlite_escape_string(html_entity_decode(strip_tags($i->get_title()))) ."', 
 					'". sqlite_escape_string($i->get_description()) ."', 
-					'". sqlite_escape_string($i->get_permalink()) ."'
+					'". sqlite_escape_string($i->get_permalink()) ."',
+					'1'
 				);
 			");
 			$addcount++;
