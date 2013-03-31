@@ -38,8 +38,10 @@
           </button>
           <a class="brand" href="index.php">Riuku</a>
           <p class="pull-left navbar-text">IPA: [ˈriukʷu]</p>
+          <p class="pull-left navbar-text" id="unread"></p>
           <div class="nav-collapse collapse">
             <ul class="nav pull-right">
+							<li><a href="#" id="markread">Mark all as read</a></li>
 							<li><a href="#manage" data-toggle="modal">Manage</a></li>
               <li><a href="#" id="refresh">Refresh</a></li>
             </ul>

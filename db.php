@@ -4,6 +4,9 @@ class db {
 	private $handle;
 
 	function __construct($filename) {
+		if(!is_dir('db'))
+			mkdir('db');
+		
 		$this->handle = sqlite_open($filename, 0644, $error);
 		if (!$this->handle) die("Cannot open DB: '$error'\n");
 		

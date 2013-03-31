@@ -14,6 +14,9 @@ $feeds = $db->query("SELECT ROWID, url FROM feeds;");
 
 $f = new SimplePie();
 
+if(!is_dir('cache'))
+	mkdir('cache');
+
 $addcount = 0;
 
 foreach($feeds as $feed) {
@@ -42,6 +45,7 @@ foreach($feeds as $feed) {
 	}
 }
 
+header('Content-type: application/json');
 echo json_encode(array(
 	"items_added" => $addcount,
 	"time" => (microtime(true) - $begin)

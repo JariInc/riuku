@@ -3,12 +3,13 @@ var lastItemTimestamp = 0;
 $(document).ready(function() {
 	
 	// init items
-	getitems(lastItemTimestamp);
+	getitems(0, 0, 'desc', 50);
 	
 	// refresh button
 	$("#refresh").click(function( event ) {
 		
 		$("#refresh").spin("small");
+		getitems(lastItemTimestamp, 0, 'desc');
 		
 		$.getJSON('refresh.php', function(data) {
 			
@@ -26,7 +27,7 @@ $(document).ready(function() {
 		})
 		.done(function() { 
 			$("#refresh").spin(false);
-			getitems(lastItemTimestamp);
+			getitems(lastItemTimestamp, 0, 'desc');
 		})
 		.fail(function() { 
 			$("#alerts").html('<div class="alert"><button type="button" class="close" data-dismiss="alert">&times;</button>Refreshing feeds failed!</div>');
@@ -41,7 +42,7 @@ $(document).ready(function() {
 	$('#manage').on('hide', function () {
 		// clear and get
 		$("#items").html("");
-		getitems();
+		getitems(0, 0, 'desc', 50);
 	});
 	
 	// add feed
@@ -59,6 +60,18 @@ $(document).ready(function() {
 		.fail(function(data) { alert("Error!"); })
 		.always(function() { getfeeds(); }); 
 	});
+	
+	// mark all read
+	$('#markread').click(function( event ) {
+		$("#markread").spin("small");
+		$.get('items.php?read=all').done(function() { 
+			$("#markread").spin(false);
+			updateUnread();
+			$("#items").html("");
+			getitems(0, 0, 'desc', 50);
+		});
+	});
+	
 });
 
 function getfeeds() {
@@ -113,28 +126,52 @@ function getfeeds() {
 	}); 
 }
 
-function getitems(timestamp) {
-	$.getJSON('items.php?ts='+ timestamp	, function(data) {
+function getitems(from, to, order, count) {
+	var query = "items.php?list=true";
+	
+	if(count)
+		query += '&count='+ count;
+	
+	if(order)
+		query += '&order='+ order;
+	
+	if(from)
+		query += '&from='+ from;
+	
+	if(to)
+		query += '&to='+ to;
+	
+	$.getJSON(query, function(data) {
 		$.each(data["items"], function(key, val) {
 			
 			if(parseInt(val["timestamp"]) > lastItemTimestamp) {
 				lastItemTimestamp = parseInt(val["timestamp"]);
 			}
 			
+			// disable images
+			content = val['content'].replace(/src/gi, "srchidden");
+			
+			if(val["unread"] == 1)
+				subject = '<a class="unread">'+ val['subject'] +'</a>';
+			else
+				subject = '<a>'+ val['subject'] +'</a>';
+			
 			$("#items").prepend(
 				'<div class="item" item="'+ val['ROWID'] +'">'+
-				'	<p class="itemheader">'+
-				'		<a>'+ val['subject'] +'</a>'+
+				'	<p class="itemheader" id="itemheader-'+ val['ROWID'] +'">'+
+				'		'+ subject +
 				'		<small>'+ val['feed'] +'</small>'+
 				'	</p>'+
 				'	<div class="well well-small itemcontent" id="item-'+ val['ROWID'] +'">'+
-				'		<p>'+ val['content'] +'</p>'+
+				'		<p>'+ content +'</p>'+
 				'		<p><a class="btn btn-mini btn-primary" href="'+ val['link'] +'">More</a></p>'+
 				'	</div>'+
 				'</div>'
 			);
 		});
 	}).done(function(data) {
+		
+		$('.itemcontent img').src="about:blank";
 		$('.itemcontent').hide();
 		
 		// expand
@@ -145,29 +182,39 @@ function getitems(timestamp) {
 				var id = $(this).attr("item");
 				var scrollbar = $(window).scrollTop();
 				var offset = 0;
-				$('.itemcontent:visible').not('#item-'+ id).each(function() {
-					offset = offset + $(this).height();
-					$(this).hide();
-				});
+				$('.itemcontent:visible').not('#item-'+ id).hide();
 				
+				// show the item
 				$('#item-'+ id).toggle();
 				
+				// enable images
+				$('#item-'+ id).html($('#item-'+ id).html().replace(/srchidden/gi, "src"));
+				
 				// scroll to header and leave 5px margin to top
-				if(isMobile()) {
+				if($('.navbar').css('position') == "static") {
 					$(window).scrollTop($('#item-'+ id).prev().offset().top - 5);
 				}
 				else {
 					$(window).scrollTop($('#item-'+ id).prev().offset().top - $('.navbar').height() - 5);
 				}
+				
+				// mark it read
+				$.get('items.php?read='+ id);
+				$('#itemheader-'+ id + ' a').removeClass("unread");
+				updateUnread();
 			}
 		});
 	}); 
+	
+	updateUnread();
 }
 
-
-function isMobile() {
-	if($('.visible-mobile').css('display') == "block")
-		return true;
-	else
-		return false;
+function updateUnread() {
+	$.getJSON("items.php?unread=true", function(data) {
+		if(data['unread'] > 0)
+			$('#unread').html('<span class="label label-important">'+ data["unread"] +' unread items</span>');
+		else {
+			$('#unread').html("");
+		}
+	});
 }

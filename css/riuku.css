@@ -11,3 +11,11 @@
 	margin-top: 2px;
 	cursor: pointer;
 }
+
+a.unread {
+	font-weight: bold;
+}
+
+#unread {
+	margin-left: 10px;
+}
