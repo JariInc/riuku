@@ -1,9 +1,10 @@
 var lastItemTimestamp = 0;
+var firstItemTimestamp = new Date().getTime()/1000;
 
 $(document).ready(function() {
 	
 	// init items
-	getitems(0, 0, 'desc', 50);
+	getitems(0, 0, 'desc', 100);
 	
 	// refresh button
 	$("#refresh").click(function( event ) {
@@ -42,7 +43,7 @@ $(document).ready(function() {
 	$('#manage').on('hide', function () {
 		// clear and get
 		$("#items").html("");
-		getitems(0, 0, 'desc', 50);
+		getitems(0, 0, 'desc', 100);
 	});
 	
 	// add feed
@@ -126,7 +127,7 @@ function getfeeds() {
 	}); 
 }
 
-function getitems(from, to, order, count) {
+function getitems(from, to, order, count, append, inverse) {
 	var query = "items.php?list=true";
 	
 	if(count)
@@ -142,10 +143,18 @@ function getitems(from, to, order, count) {
 		query += '&to='+ to;
 	
 	$.getJSON(query, function(data) {
+		
+		if(inverse)
+			data["items"] = data["items"].reverse();
+		
 		$.each(data["items"], function(key, val) {
 			
 			if(parseInt(val["timestamp"]) > lastItemTimestamp) {
 				lastItemTimestamp = parseInt(val["timestamp"]);
+			}
+			
+			if(parseInt(val["timestamp"]) < firstItemTimestamp) {
+				firstItemTimestamp = parseInt(val["timestamp"]);
 			}
 			
 			// disable images
@@ -156,18 +165,24 @@ function getitems(from, to, order, count) {
 			else
 				subject = '<a>'+ val['subject'] +'</a>';
 			
-			$("#items").prepend(
-				'<div class="item" item="'+ val['ROWID'] +'">'+
-				'	<p class="itemheader" id="itemheader-'+ val['ROWID'] +'">'+
-				'		'+ subject +
-				'		<small>'+ val['feed'] +'</small>'+
-				'	</p>'+
-				'	<div class="well well-small itemcontent" id="item-'+ val['ROWID'] +'">'+
-				'		<p>'+ content +'</p>'+
-				'		<p><a class="btn btn-mini btn-primary" href="'+ val['link'] +'">More</a></p>'+
-				'	</div>'+
-				'</div>'
-			);
+			//var date = new Date(val['timestamp']*1000);
+			
+			var item = 
+			'<div class="item" item="'+ val['ROWID'] +'">'+
+			'	<p class="itemheader" id="itemheader-'+ val['ROWID'] +'">'+
+			'		'+ subject +
+			'		<small>'+ moment(val['timestamp'], "X").fromNow() +' <strong>'+ val['feed'] +'</strong></small>'+
+			'	</p>'+
+			'	<div class="well well-small itemcontent" id="item-'+ val['ROWID'] +'">'+
+			'		<p>'+ content +'</p>'+
+			'		<p><a class="btn btn-mini btn-primary" href="'+ val['link'] +'">More</a></p>'+
+			'	</div>'+
+			'</div>';
+			
+			if(append)
+				$("#items").append(item);
+			else
+				$("#items").prepend(item);
 		});
 	}).done(function(data) {
 		
@@ -204,8 +219,14 @@ function getitems(from, to, order, count) {
 				updateUnread();
 			}
 		});
+		
+		// infinite scroll
+		$(window).scroll(function(){
+			if($(window).scrollTop() == $(document).height() - $(window).height()){
+				getitems(0, firstItemTimestamp, "desc", 50, true, true);
+			}
+		});
 	}); 
-	
 	updateUnread();
 }
 

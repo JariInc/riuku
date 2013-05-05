@@ -26,8 +26,11 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <!--
     <script src="js/spin.min.js"></script>
     <script src="js/jquery.spin.js"></script>
+    -->
+    <script src="js/moment.min.js"></script>
 		<script src="js/riuku.js"></script>
   </body>
 </html>
